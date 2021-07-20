@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/sawmodz/MusicBotDiscord/issues"
   },
-  "homepage": "https://github.com/sawmodz/MusicBotDiscord#readme"
+  "homepage": "https://github.com/sawmodz/MusicBotDiscord#readme",
+  "dependencies": {
+    "discord.js": "^12.5.3"
+  }
 }
