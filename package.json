@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/sawmodz/MusicBotDiscord#readme",
   "dependencies": {
+    "discord-buttons": "^4.0.0",
     "discord.js": "^12.5.3"
   }
 }

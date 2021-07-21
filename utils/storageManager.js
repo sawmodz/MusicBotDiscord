@@ -31,4 +31,32 @@ const readData = (file) => {
     return data
 }
 
-module.exports = {getSettings, setData}
+const createDataGuild = (guildID, command_channel_id, music_list_message_id, music_message_id) => {
+    try {
+        let path = PATH+"guilds/"+guildID+".json"
+
+        data = {
+            "guildID":guildID,
+            "command_channel_id":command_channel_id,
+            "music_list_message_id":music_list_message_id,
+            "music_message_id":music_message_id,
+            "queueConstruct":{
+                "textChannel": null,
+                "voiceChannel": null,
+                "connection": null,
+                "songs": [],
+                "volume": 2,
+                "playing": false,
+                "repeat": false,
+                "random": false
+            }
+        }
+
+        fs.writeFileSync(path, JSON.stringify(data))
+        return data
+    } catch (error) {
+        return {}
+    }
+}
+
+module.exports = {getSettings, setData, createDataGuild}
