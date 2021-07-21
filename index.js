@@ -8,6 +8,8 @@ const fs = require("fs")
 const guildCreate = require("./event/guildCreate")
 const messageEvent = require("./event/message")
 
+let connections = {}
+
 const lengthOfPage = 10
 
 client.on("ready", ()=>{
@@ -32,13 +34,23 @@ client.on("guildDelete", (guild)=>{
 })
 
 client.on("message", (message)=>{
-    messageEvent.messages(client, message, changeList, changeBox)
+    messageEvent.messages(client, message, changeList, changeBox, setConnection)
 })
 
 client.on("voiceStateUpdate", (oldMember, newMember) => {
     if(newMember.id == "858492022217637949" && newMember.channelID == null){
         storageManager.setData("guilds/"+newMember.guild.id, "songs", [])
         changeList(false, newMember.guild.id, client, null)
+    }
+})
+
+client.on("clickButton", async(button)=>{
+    switch (button.id) {
+        case "skip":
+            button.reply.defer()
+            let connection = getConnection(button.guild.id)
+            await connection.dispatcher.end()
+            break
     }
 })
 
@@ -166,6 +178,14 @@ const changeBox = (isPlay, title, image, songs, guildID) => {
             components: [skip]
         })
     })
+}
+
+const setConnection = (guildID, connection) => {
+    connections[guildID] = connection
+}
+
+const getConnection = (guildID) => {
+    return connections[guildID]
 }
 
 client.login(storageManager.getSettings("auth", "discord_bot_token"))

@@ -24,7 +24,7 @@ const spotifyApi = new SpotifyWebApi({
 spotifyApi.setAccessToken(storageManager.getSettings("auth", "spotify_token"))
 spotifyApi.setRefreshToken(storageManager.getSettings("auth", "spotify_refresh_token"))
 
-const messages = async (client, message, changeList, changeBox) => {
+const messages = async (client, message, changeList, changeBox, setConnection) => {
     if(message.author.bot) return
 
     const guildID = message.guild.id
@@ -110,7 +110,7 @@ const messages = async (client, message, changeList, changeBox) => {
                 queueConstruct.connection = connection
                 let song = queueConstruct.songs[0]
                 changeBox(true, song.title, song.image.url, queueConstruct.songs, guildID)
-                play.playSong(song, queueConstruct, guildID, changeList, client, changeBox)
+                play.playSong(song, queueConstruct, guildID, changeList, client, changeBox, setConnection)
             } catch (error) {
                 console.log(error)
                 await channel.leave()

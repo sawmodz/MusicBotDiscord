@@ -8,7 +8,7 @@ const opts = {
     type: 'video'
 }
 
-const playSong = async (song, queue, guildID, changeList, client, changeBoxs) => {
+const playSong = async (song, queue, guildID, changeList, client, changeBoxs, setConnection) => {
     secondes = 0
 
     if (song == undefined || song == null || !song) {
@@ -27,12 +27,13 @@ const playSong = async (song, queue, guildID, changeList, client, changeBoxs) =>
 
     const dispatcher = queue.connection.play(ytdl(song.url))
         .on('finish', () => {
+            setConnection(guildID, queue.connection)
             songss = storageManager.getSettings("guilds/"+guildID, "songs")
             songss.shift()
-            playSong(songss[0], queue, guildID, changeList, client, changeBoxs)
+            playSong(songss[0], queue, guildID, changeList, client, changeBoxs, setConnection)
             changeList(true, guildID, client, songss)
             if(songss[0]){
-                changeBoxs(true, queue.songs[0].title, queue.songs[0].image.url, guildID)
+                changeBoxs(true, songss[0].title, songss[0].image.url, songss, guildID)
             }
             storageManager.setData("guilds/"+guildID, "songs", songss)
         })
@@ -40,6 +41,7 @@ const playSong = async (song, queue, guildID, changeList, client, changeBoxs) =>
     dispatcher.setVolumeLogarithmic(queue.volume / 5)
 
     storageManager.setData("guilds/"+guildID, "songs", queue.songs)
+    setConnection(guildID, queue.connection)
 }
 
 module.exports = {playSong}
