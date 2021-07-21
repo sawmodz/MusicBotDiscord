@@ -1,16 +1,27 @@
 const storageManager = require("../utils/storageManager")
+const SpotifyWebApi = require('spotify-web-api-node')
 const clientUtils = require("../utils/clientUtils")
 const play = require("../utils/music/play")
 const search = require('youtube-search')
 const { Util } = require('discord.js')
 const ytdl = require('ytdl-core')
+
 const opts = {
     maxResults: 1,
     key: storageManager.getSettings("auth", "youtube_key"),
     type: 'video'
 }
 
-module.exports = async (client, message) => {
+const spotifyApi = new SpotifyWebApi({
+    clientId: storageManager.getSettings("auth", "spotify_client_id"),
+    clientSecret: storageManager.getSettings("auth", "spotify_client_secret"),
+    redirectUri: 'http://localhost:8888/callback'
+})
+
+spotifyApi.setAccessToken(storageManager.getSettings("auth", "spotify_token"))
+spotifyApi.setRefreshToken(storageManager.getSettings("auth", "spotify_refresh_token"))
+
+const messages = async (client, message) => {
     if(message.author.bot) return
 
     const guildID = message.guild.id
@@ -55,9 +66,10 @@ module.exports = async (client, message) => {
             } catch (error) {
                 if(message.toString().includes("https://open.spotify.com")){
                     if(message.toString().includes("playlist")){
-                        await getPlaylistTracks(message.toString(), message.author.username)
+                        console.log(queueConstruct)
+                        queueConstruct = await getPlaylistTracks(message.toString(), message.author.username, queueConstruct)
                     }
-                    message.delete()
+                    await message.delete()
                 }else{
                     let _song = await search(message.toString().replace(/,/g,' '), opts)
 
@@ -88,7 +100,6 @@ module.exports = async (client, message) => {
                 const connection = await channel.join()
                 queueConstruct.connection = connection
                 let song = queueConstruct.songs[0]
-                message.delete()
                 //changeBox(true, song.title, song.image.url)
                 play.playSong(song, queueConstruct, guildID)
             } catch (error) {
@@ -97,3 +108,45 @@ module.exports = async (client, message) => {
         }
     }
 }
+
+const getPlaylistTracks = async (playlistId, author, queueConstruct) => {
+    message = playlistId
+    try {
+        playlistId = playlistId.split("/")[4].split("?")[0]
+        const data = await spotifyApi.getPlaylistTracks(playlistId, {
+        offset: 1,
+        limit: 100,
+        fields: 'items'
+        })
+    
+        for (let track_obj of data.body.items) {
+            const track = track_obj.track
+            song = {
+                id: track.id,
+                title: track.name,
+                url: "SPOTIFY",
+                image: "SPOTIFY",
+                lengthSeconds: (track.duration_ms/1000),
+                musicAuthor: track.artists[0].name,
+                author: author
+            }
+            queueConstruct.songs.push(song);
+        }
+        return queueConstruct
+    } catch (error) {
+        await spotifyApi.refreshAccessToken().then(
+            function(data) {
+                console.log('The access token has been refreshed!');
+
+                spotifyApi.setAccessToken(data.body['access_token']);
+            },
+            function(err) {
+                console.log('Could not refresh access token', err);
+            }
+        )
+        return await getPlaylistTracks(message, author, queueConstruct)
+    }
+    
+}
+
+module.exports = {messages}

@@ -30,7 +30,7 @@ client.on("guildDelete", (guild)=>{
 })
 
 client.on("message", (message)=>{
-    messageEvent(client, message)
+    messageEvent.messages(client, message)
 })
 
 client.login(storageManager.getSettings("auth", "discord_bot_token"))

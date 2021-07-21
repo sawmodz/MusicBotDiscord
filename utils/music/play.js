@@ -1,6 +1,13 @@
 const storageManager = require("../storageManager")
+const search = require('youtube-search')
 const ytdl = require('ytdl-core')
 let timer
+
+const opts = {
+    maxResults: 1,
+    key: storageManager.getSettings("auth", "youtube_key"),
+    type: 'video'
+}
 
 const playSong = async (song, queue, guildID) => {
     clearInterval(timer)
@@ -48,7 +55,7 @@ const playSong = async (song, queue, guildID) => {
                 
                 queue.songs = array
             }
-            play(queue.songs[0], queue, guildID)
+            playSong(queue.songs[0], queue, guildID)
             if(queue.songs[0]){
                 //changeBox(true, queue.songs[0].title, queue.songs[0].image.url)
             }
