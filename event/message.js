@@ -4,6 +4,7 @@ const clientUtils = require("../utils/clientUtils")
 const play = require("../utils/music/play")
 const search = require('youtube-search')
 const { Util } = require('discord.js')
+const Discord = require('discord.js')
 const ytdl = require('ytdl-core')
 
 const lengthOfPage = 10
@@ -23,7 +24,7 @@ const spotifyApi = new SpotifyWebApi({
 spotifyApi.setAccessToken(storageManager.getSettings("auth", "spotify_token"))
 spotifyApi.setRefreshToken(storageManager.getSettings("auth", "spotify_refresh_token"))
 
-const messages = async (client, message, Discord, MessageButton, MessageActionRow) => {
+const messages = async (client, message, changeList, changeBox) => {
     if(message.author.bot) return
 
     const guildID = message.guild.id
@@ -74,6 +75,10 @@ const messages = async (client, message, Discord, MessageButton, MessageActionRo
                     await message.delete()
                 }else{
                     let _song = await search(message.toString().replace(/,/g,' '), opts)
+                    
+                    if(_song.length == 0){
+                        message.delete()
+                    }
 
                     song = {
                         id: _song.results[0].id,
@@ -90,7 +95,7 @@ const messages = async (client, message, Discord, MessageButton, MessageActionRo
                 message.delete()
                 if (queueConstruct.songs.length != 0) {
                     queueConstruct.songs.push(song)
-                    changeList(true, guildID, client, queueConstruct, Discord, MessageButton, MessageActionRow)
+                    changeList(true, guildID, client, queueConstruct.songs)
                     storageManager.setData("guilds/"+guildID, "songs", queueConstruct.songs)
                     return
                 }
@@ -98,15 +103,16 @@ const messages = async (client, message, Discord, MessageButton, MessageActionRo
                 queueConstruct.songs.push(song);
             }
 
-            changeList(true, guildID, client, queueConstruct, Discord, MessageButton, MessageActionRow)
+            changeList(true, guildID, client, queueConstruct.songs)
 
             try {
                 const connection = await channel.join()
                 queueConstruct.connection = connection
                 let song = queueConstruct.songs[0]
-                //changeBox(true, song.title, song.image.url)
-                play.playSong(song, queueConstruct, guildID)
+                changeBox(true, song.title, song.image.url, queueConstruct.songs, guildID)
+                play.playSong(song, queueConstruct, guildID, changeList, client, changeBox)
             } catch (error) {
+                console.log(error)
                 await channel.leave()
             }
         }
@@ -153,71 +159,5 @@ const getPlaylistTracks = async (playlistId, author, queueConstruct) => {
     
 }
 
-const changeList = (isMusic, guildID, client, queueConstruct, Discord, MessageButton, MessageActionRow) => {
-    let _songs = []
-    let song = queueConstruct.songs
 
-    let currentPage = storageManager.getSettings("guilds/"+guildID, "currentPage")
-    let maxPage = storageManager.getSettings("guilds/"+guildID, "maxPage")
-
-    if(!isMusic){
-        _songs = ["Aucune musique :("]
-    }else{
-        let id = 0
-        for(const _song of song){
-            if(id <= (lengthOfPage*currentPage) && id >= ((lengthOfPage*currentPage) - lengthOfPage)){
-                if(id == 0){
-                    _songs.push(" > 🔴 " + _song.title + " (" +  _song.author + ")")
-                }else{
-                    _songs.push(" > "+ id +" : " + _song.title + " (" +  _song.author + ")")
-                }
-            }
-            id++
-        }
-
-        if(song.length > 0){
-            _maxpage = ((song.length-1)/lengthOfPage)+1
-            maxPage = parseInt(_maxpage.toString().split(",")[0])
-        }else{
-            maxPage = 1
-        }
-        
-        if(currentPage != maxPage){
-            if(song.length > 30){
-                _songs.push("...")
-            }
-        }
-
-        storageManager.setData("guilds/"+guildID, "currentPage", currentPage)
-        storageManager.setData("guilds/"+guildID, "maxPage", maxPage)
-    }
-
-    client.channels.cache.get(storageManager.getSettings("guilds/"+guildID, "command_channel_id")).messages.fetch(storageManager.getSettings("guilds/"+guildID, "music_message_id")).then(bip=>{
-        let list = new Discord.MessageEmbed()
-        .setTitle("The playlist !")
-        .setColor(0x00AE86)
-        .setDescription(_songs.join("\n"))
-        .setFooter(currentPage + " / " + maxPage)
-
-        const pageSuivant = new MessageButton()
-        .setStyle('blurple')
-        .setLabel("Next")
-        .setID("nextPage")
-    
-        const pagePrecedente = new MessageButton()
-        .setStyle('blurple')
-        .setLabel("Previous")
-        .setID("bellowPage")
-
-        const page = new MessageActionRow()
-        .addComponent(pagePrecedente)
-        .addComponent(pageSuivant)
-
-        bip.edit("", {
-            embed: list,
-            components: [page]
-        })
-    })
-}
-
-module.exports = {messages, changeList}
+module.exports = {messages}
