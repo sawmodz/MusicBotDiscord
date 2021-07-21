@@ -2,7 +2,7 @@ const storageManager = require("../storageManager")
 const ytdl = require('ytdl-core')
 let timer
 
-module.exports = async (song, queue, guildID) => {
+const playSong = async (song, queue, guildID) => {
     clearInterval(timer)
     secondes = 0
 
@@ -58,3 +58,5 @@ module.exports = async (song, queue, guildID) => {
 
     storageManager.setData("guilds/"+guildID, "songs", queue.songs)
 }
+
+module.exports = {playSong}

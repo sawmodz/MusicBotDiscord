@@ -2,6 +2,8 @@ const storageManager = require("../utils/storageManager")
 const clientUtils = require("../utils/clientUtils")
 const play = require("../utils/music/play")
 const search = require('youtube-search')
+const { Util } = require('discord.js')
+const ytdl = require('ytdl-core')
 const opts = {
     maxResults: 1,
     key: storageManager.getSettings("auth", "youtube_key"),
@@ -88,7 +90,7 @@ module.exports = async (client, message) => {
                 let song = queueConstruct.songs[0]
                 message.delete()
                 //changeBox(true, song.title, song.image.url)
-                play(song, queueConstruct, guildID)
+                play.playSong(song, queueConstruct, guildID)
             } catch (error) {
                 await channel.leave()
             }
