@@ -85,9 +85,9 @@ const messages = async (client, message) => {
             }
 
             if(!message.toString().includes("https://open.spotify.com")){
+                message.delete()
                 if (queueConstruct.songs.length != 0) {
                     queueConstruct.songs.push(song);
-                    message.delete()
                     //change list
                     storageManager.setData("guilds/"+guildID, "songs", queueConstruct.songs)
                     return

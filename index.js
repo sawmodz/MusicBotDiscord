@@ -33,4 +33,10 @@ client.on("message", (message)=>{
     messageEvent.messages(client, message)
 })
 
+client.on("voiceStateUpdate", (oldMember, newMember) => {
+    if(newMember.id == "858492022217637949" && newMember.channelID == null){
+        storageManager.setData("guilds/"+newMember.guild.id, "songs", [])
+    }
+})
+
 client.login(storageManager.getSettings("auth", "discord_bot_token"))
