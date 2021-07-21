@@ -59,4 +59,11 @@ const createDataGuild = (guildID, command_channel_id, music_list_message_id, mus
     }
 }
 
-module.exports = {getSettings, setData, createDataGuild}
+
+const removeGuild = (guildID) => {
+    let path = PATH+"guilds/"+guildID+".json"
+    if(pathExist(path))
+        fs.unlinkSync(path)
+}
+
+module.exports = {getSettings, setData, createDataGuild, removeGuild}

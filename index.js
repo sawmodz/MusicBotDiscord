@@ -15,4 +15,8 @@ client.on("guildCreate", (guild)=>{
     guildCreate(client, guild, MessageButton, MessageActionRow, Discord)
 })
 
+client.on("guildDelete", (guild)=>{
+    storageManager.removeGuild(guild.id)
+})
+
 client.login(storageManager.getSettings("auth", "discord_bot_token"))
