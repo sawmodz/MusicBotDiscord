@@ -30,12 +30,13 @@ client.on("guildDelete", (guild)=>{
 })
 
 client.on("message", (message)=>{
-    messageEvent.messages(client, message)
+    messageEvent.messages(client, message, Discord, MessageButton, MessageActionRow)
 })
 
 client.on("voiceStateUpdate", (oldMember, newMember) => {
     if(newMember.id == "858492022217637949" && newMember.channelID == null){
         storageManager.setData("guilds/"+newMember.guild.id, "songs", [])
+        messageEvent.changeList(false, newMember.guild.id, client, Discord, MessageButton, MessageActionRow)
     }
 })
 

@@ -44,7 +44,9 @@ const createDataGuild = (guildID, command_channel_id, music_list_message_id, mus
             "volume": 2,
             "playing": false,
             "repeat": false,
-            "random": false
+            "random": false,
+            "currentPage": 1,
+            "maxPage": 1
         }
 
         fs.writeFileSync(path, JSON.stringify(data))
