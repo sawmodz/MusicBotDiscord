@@ -45,31 +45,36 @@ client.on("voiceStateUpdate", (oldMember, newMember) => {
 })
 
 client.on("clickButton", async(button)=>{
+    let connection = getConnection(button.guild.id)
+    let songs = storageManager.getSettings("guilds/"+button.guild.id, "songs")
     switch (button.id) {
         case "skip":
             button.reply.defer()
-            let connection = getConnection(button.guild.id)
             await connection.dispatcher.end()
             break
         
         case "pause":
-            let connection = getConnection(button.guild.id)
-            let songs = storageManager.getSettings("guilds/"+button.guild.id, "songs")
+            button.reply.defer()
             await connection.dispatcher.pause()
             storageManager.setData("guilds/"+button.guild.id, "playing", false)
-            changeBox(true, songs.title, songs.image.url, songs, button.guild.id)
+            setConnection(button.guild.id, connection)
+            changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
             break
 
-        case "play":
-            let connection = getConnection(button.guild.id)
-            connection.dispatcher.pause()
-            connection.dispatcher.resume()
-            connection.dispatcher.pause()
-            connection.dispatcher.resume()
-            connection.dispatcher.resume()
-            storageManager.setData("guilds/"+button.guild.id, "playing", true)
-            let songs = storageManager.getSettings("guilds/"+button.guild.id, "songs")
-            changeBox(true, songs.title, songs.image.url, songs, button.guild.id)
+        case "resume":
+            try {
+                button.reply.defer()
+                connection.dispatcher.pause()
+                connection.dispatcher.resume()
+                connection.dispatcher.pause()
+                connection.dispatcher.resume()
+                connection.dispatcher.resume()
+                setConnection(button.guild.id, connection)
+                storageManager.setData("guilds/"+button.guild.id, "playing", true)
+                changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
+            } catch (error) {
+                console.log(error)
+            }
     }
 })
 
