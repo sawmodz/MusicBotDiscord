@@ -17,18 +17,20 @@ const playSong = async (song, queue, guildID, changeList, client, changeBoxs, se
         return
     }
 
+    let songss = storageManager.getSettings("guilds/"+guildID, "songs")
+
     if(song.url == "SPOTIFY"){
         let _song = await search(song.title + " " + song.musicAuthor, opts)
         song.url = _song.results[0].link
         song.image = _song.results[0].thumbnails.high
         queue.songs[0].url = _song.results[0].link
         queue.songs[0].image = _song.results[0].thumbnails.high
+        changeBoxs(true, song.title, song.image.url, songss, guildID)
     }
 
     const dispatcher = queue.connection.play(ytdl(song.url))
         .on('finish', () => {
             setConnection(guildID, queue.connection)
-            songss = storageManager.getSettings("guilds/"+guildID, "songs")
             songss.shift()
             playSong(songss[0], queue, guildID, changeList, client, changeBoxs, setConnection)
             changeList(true, guildID, client, songss)

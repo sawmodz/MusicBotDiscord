@@ -71,6 +71,7 @@ const messages = async (client, message, changeList, changeBox, setConnection) =
                     if(message.toString().includes("playlist")){
                         console.log(queueConstruct)
                         queueConstruct = await getPlaylistTracks(message.toString(), message.author.username, queueConstruct)
+                        storageManager.setData("guilds/"+guildID, "songs", queueConstruct.songs)
                     }
                     await message.delete()
                 }else{
