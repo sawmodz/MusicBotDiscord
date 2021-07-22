@@ -51,6 +51,25 @@ client.on("clickButton", async(button)=>{
             let connection = getConnection(button.guild.id)
             await connection.dispatcher.end()
             break
+        
+        case "pause":
+            let connection = getConnection(button.guild.id)
+            let songs = storageManager.getSettings("guilds/"+button.guild.id, "songs")
+            await connection.dispatcher.pause()
+            storageManager.setData("guilds/"+button.guild.id, "playing", false)
+            changeBox(true, songs.title, songs.image.url, songs, button.guild.id)
+            break
+
+        case "play":
+            let connection = getConnection(button.guild.id)
+            connection.dispatcher.pause()
+            connection.dispatcher.resume()
+            connection.dispatcher.pause()
+            connection.dispatcher.resume()
+            connection.dispatcher.resume()
+            storageManager.setData("guilds/"+button.guild.id, "playing", true)
+            let songs = storageManager.getSettings("guilds/"+button.guild.id, "songs")
+            changeBox(true, songs.title, songs.image.url, songs, button.guild.id)
     }
 })
 
@@ -156,10 +175,19 @@ const changeBox = (isPlay, title, image, songs, guildID) => {
         .setLabel("Random")
         .setID("randomStart")
 
-        let btnPause = new MessageButton()
-        .setStyle('red')
-        .setLabel("Play")
-        .setID("resume")
+        let isPause = storageManager.getSettings("guilds/"+guildID, "playing")
+        let btnPause
+        if(isPause){
+            btnPause = new MessageButton()
+            .setStyle('blurple')
+            .setLabel("Pause")
+            .setID("pause")
+        }else{
+            btnPause= new MessageButton()
+            .setStyle('red')
+            .setLabel("Play")
+            .setID("resume")
+        }
 
         const btnStop = new MessageButton()
         .setStyle('red')

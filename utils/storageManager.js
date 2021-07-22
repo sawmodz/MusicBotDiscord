@@ -41,7 +41,7 @@ const createDataGuild = (guildID, command_channel_id, music_list_message_id, mus
             "music_list_message_id":music_list_message_id,
             "music_message_id":music_message_id,
             "songs": [],
-            "volume": 2,
+            "volume": 4,
             "playing": false,
             "repeat": false,
             "random": false,
