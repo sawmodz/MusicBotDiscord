@@ -41,6 +41,7 @@ client.on("voiceStateUpdate", (oldMember, newMember) => {
     if(newMember.id == "858492022217637949" && newMember.channelID == null){
         storageManager.setData("guilds/"+newMember.guild.id, "songs", [])
         changeList(false, newMember.guild.id, client, null)
+        changeBox(false, null, null, null, newMember.guild.id)
     }
 })
 
@@ -62,19 +63,15 @@ client.on("clickButton", async(button)=>{
             break
 
         case "resume":
-            try {
-                button.reply.defer()
-                connection.dispatcher.pause()
-                connection.dispatcher.resume()
-                connection.dispatcher.pause()
-                connection.dispatcher.resume()
-                connection.dispatcher.resume()
-                setConnection(button.guild.id, connection)
-                storageManager.setData("guilds/"+button.guild.id, "playing", true)
-                changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
-            } catch (error) {
-                console.log(error)
-            }
+            button.reply.defer()
+            connection.dispatcher.pause()
+            connection.dispatcher.resume()
+            connection.dispatcher.pause()
+            connection.dispatcher.resume()
+            connection.dispatcher.resume()
+            setConnection(button.guild.id, connection)
+            storageManager.setData("guilds/"+button.guild.id, "playing", true)
+            changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
     }
 })
 
