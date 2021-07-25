@@ -39,6 +39,11 @@ const playSong = async (song, queue, guildID, changeList, client, changeBoxs, se
                 setConnection(guildID, queue.connection)
 
                 songss.shift()
+
+                if(storageManager.getSettings("guilds/"+guildID, "random")){
+                    songss = shuffle(songss)
+                }
+
                 playSong(songss[0], queue, guildID, changeList, client, changeBoxs, setConnection)
 
                 storageManager.setData("guilds/"+guildID, "songs", songss)
@@ -60,6 +65,21 @@ const playSong = async (song, queue, guildID, changeList, client, changeBoxs, se
         console.log(error)
         return
     }
+}
+
+const shuffle = (array) => {
+    let currentIndex = array.length,  randomIndex;
+  
+    while (0 !== currentIndex) {
+  
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+  
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex], array[currentIndex]];
+    }
+  
+    return array
 }
 
 module.exports = {playSong}

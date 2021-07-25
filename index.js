@@ -72,6 +72,14 @@ client.on("clickButton", async(button)=>{
             setConnection(button.guild.id, connection)
             storageManager.setData("guilds/"+button.guild.id, "playing", true)
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
+
+        case "randomStart":
+            storageManager.setData("guilds/"+button.guild.id, "random", true)
+            changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
+        
+        case "randomStop":
+            storageManager.setData("guilds/"+button.guild.id, "random", false)
+            changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
     }
 })
 
@@ -149,7 +157,6 @@ const changeBox = (isPlay, title, image, songs, guildID) => {
             .setTitle(title)
             .setColor("#c27c0e")
             .setImage(image)
-            //.setFooter(new Date(secondes * 1000).toISOString().substr(11, 8) + " / " + new Date(songs[0].lengthSeconds * 1000).toISOString().substr(11, 8))
 
             if(songs[0].url.includes("www.youtube.com")){
                 embed.setURL(songs[0].url)
@@ -172,10 +179,19 @@ const changeBox = (isPlay, title, image, songs, guildID) => {
         .setLabel("Repeat")
         .setID("repeatStart")
 
-        let btnRandom = new MessageButton()
-        .setStyle('blurple')
-        .setLabel("Random")
-        .setID("randomStart")
+        let isRandom = storageManager.getSettings("guilds/"+guildID, "random")
+        let btnRandom
+        if(isRandom){
+            btnRandom = new MessageButton()
+            .setStyle('grey')
+            .setLabel("Random")
+            .setID("randomStop")
+        }else{
+            btnRandom = new MessageButton()
+            .setStyle('blurple')
+            .setLabel("Random")
+            .setID("randomStart")
+        }
 
         let isPause = storageManager.getSettings("guilds/"+guildID, "playing")
         let btnPause
