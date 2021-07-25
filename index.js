@@ -74,10 +74,12 @@ client.on("clickButton", async(button)=>{
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
 
         case "randomStart":
+            button.reply.defer()
             storageManager.setData("guilds/"+button.guild.id, "random", true)
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
         
         case "randomStop":
+            button.reply.defer()
             storageManager.setData("guilds/"+button.guild.id, "random", false)
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
     }
