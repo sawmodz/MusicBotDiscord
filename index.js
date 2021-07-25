@@ -175,7 +175,7 @@ const changeBox = (isPlay, title, image, songs, guildID) => {
             
         }else{
             embed = new Discord.MessageEmbed()
-            .setTitle("Aucun titre en cour !")
+            .setTitle("No song !")
             .setColor("#c27c0e")
             .setImage("https://static.wikia.nocookie.net/demon-hero/images/7/7c/Imagee.png/revision/latest?cb=20190531232408&path-prefix=fr")
         }
