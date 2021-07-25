@@ -82,6 +82,15 @@ client.on("clickButton", async(button)=>{
             button.reply.defer()
             storageManager.setData("guilds/"+button.guild.id, "random", false)
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
+
+        case "stop":
+            button.reply.defer()
+            storageManager.setData("guilds/"+button.guild.id, "songs", [])
+            changeList(false, button.guild.id, client, null)
+            changeBox(false, null, null, null, button.guild.id)
+            if(button.guild.me.voice.channel){
+                button.guild.me.voice.channel.leave()
+            }
     }
 })
 
