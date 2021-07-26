@@ -7,6 +7,7 @@ const fs = require("fs")
 
 const guildCreate = require("./event/guildCreate")
 const messageEvent = require("./event/message")
+const { errorMonitor } = require('events')
 
 let connections = {}
 
@@ -74,14 +75,16 @@ client.on("clickButton", async(button)=>{
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
 
         case "randomStart":
-            button.reply.defer()
+            button.reply.defer(true)
             storageManager.setData("guilds/"+button.guild.id, "random", true)
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
+            break
         
         case "randomStop":
             button.reply.defer()
             storageManager.setData("guilds/"+button.guild.id, "random", false)
             changeBox(true, songs[0].title, songs[0].image.url, songs, button.guild.id)
+            break
 
         case "stop":
             button.reply.defer()
@@ -91,6 +94,7 @@ client.on("clickButton", async(button)=>{
             if(button.guild.me.voice.channel){
                 button.guild.me.voice.channel.leave()
             }
+            break
     }
 })
 
