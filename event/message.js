@@ -8,6 +8,7 @@ const Discord = require('discord.js')
 const ytdl = require('ytdl-core')
 
 const lengthOfPage = 10
+const maxPagePremium = 2
 
 const opts = {
     maxResults: 1,
@@ -69,8 +70,7 @@ const messages = async (client, message, changeList, changeBox, setConnection) =
             } catch (error) {
                 if(message.toString().includes("https://open.spotify.com")){
                     if(message.toString().includes("playlist")){
-                        console.log(queueConstruct)
-                        queueConstruct = await getPlaylistTracks(message.toString(), message.author.username, queueConstruct)
+                        queueConstruct = await getPlaylistTracks(message.toString(), message.author.username, queueConstruct, message.guild, client, changeList)
                         storageManager.setData("guilds/"+guildID, "songs", queueConstruct.songs)
                     }
                     await message.delete()
@@ -95,8 +95,18 @@ const messages = async (client, message, changeList, changeBox, setConnection) =
             if(!message.toString().includes("https://open.spotify.com")){
                 message.delete()
                 if (queueConstruct.songs.length != 0) {
+                    let _songs = queueConstruct.songs
                     queueConstruct.songs.push(song)
                     changeList(true, guildID, client, queueConstruct.songs)
+
+                    let maxPage = storageManager.getSettings("guilds/"+guildID, "maxPage")
+                    if(maxPage >= maxPagePremium && storageManager.getSettings("guilds/"+guildID, "premium")){
+                        queueConstruct.songs = _songs
+                        let member = await message.guild.members.fetch(message.guild.ownerID)
+                        member.send("you need the premium to have more than"+ maxPagePremium +"page of music")
+                        changeList(true, guildID, client, queueConstruct.songs)
+                    }
+
                     storageManager.setData("guilds/"+guildID, "songs", queueConstruct.songs)
                     return
                 }
@@ -110,7 +120,6 @@ const messages = async (client, message, changeList, changeBox, setConnection) =
                 const connection = await channel.join()
                 queueConstruct.connection = connection
                 let song = queueConstruct.songs[0]
-                changeBox(true, song.title, song.image.url, queueConstruct.songs, guildID)
                 play.playSong(song, queueConstruct, guildID, changeList, client, changeBox, setConnection)
             } catch (error) {
                 console.log(error)
@@ -120,7 +129,7 @@ const messages = async (client, message, changeList, changeBox, setConnection) =
     }
 }
 
-const getPlaylistTracks = async (playlistId, author, queueConstruct) => {
+const getPlaylistTracks = async (playlistId, author, queueConstruct, guild, client, changeList) => {
     message = playlistId
     try {
         playlistId = playlistId.split("/")[4].split("?")[0]
@@ -129,7 +138,12 @@ const getPlaylistTracks = async (playlistId, author, queueConstruct) => {
         limit: 100,
         fields: 'items'
         })
-    
+        let _songss = []
+
+        queueConstruct.songs.forEach(music => {
+            _songss.push(music)
+        })
+
         for (let track_obj of data.body.items) {
             const track = track_obj.track
             song = {
@@ -141,10 +155,22 @@ const getPlaylistTracks = async (playlistId, author, queueConstruct) => {
                 musicAuthor: track.artists[0].name,
                 author: author
             }
-            queueConstruct.songs.push(song);
+
+            
+            queueConstruct.songs.push(song)
         }
+        changeList(true, guild.id, client, queueConstruct.songs)
+        let maxPage = storageManager.getSettings("guilds/"+guild.id, "maxPage")
+        if(maxPage >= maxPagePremium && !storageManager.getSettings("guilds/"+guild.id, "premium")){
+            queueConstruct["songs"] = _songss
+            let member = await guild.members.fetch(guild.ownerID)
+            member.send("you need the premium to have more than"+ maxPagePremium +"page of music")
+            changeList(true, guild.id, client, queueConstruct.songs)
+        }
+
         return queueConstruct
     } catch (error) {
+        console.log(error)
         await spotifyApi.refreshAccessToken().then(
             function(data) {
                 console.log('The access token has been refreshed!');
@@ -155,7 +181,7 @@ const getPlaylistTracks = async (playlistId, author, queueConstruct) => {
                 console.log('Could not refresh access token', err);
             }
         )
-        return await getPlaylistTracks(message, author, queueConstruct)
+        return await getPlaylistTracks(message, author, queueConstruct, guild, client, changeList)
     }
     
 }
