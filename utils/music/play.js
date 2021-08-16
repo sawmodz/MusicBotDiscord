@@ -58,6 +58,7 @@ const playSong = async (song, queue, guildID, changeList, client, changeBoxs, se
         dispatcher.setVolumeLogarithmic(queue.volume / 5)
         
         storageManager.setData("guilds/"+guildID, "songs", queue.songs)
+        changeBoxs(true, song.title, song.image.url, queue.songs, guildID)
         setConnection(guildID, queue.connection)
     } catch (error) {
         await queue.voiceChannel.leave()

@@ -95,12 +95,16 @@ const messages = async (client, message, changeList, changeBox, setConnection) =
             if(!message.toString().includes("https://open.spotify.com")){
                 message.delete()
                 if (queueConstruct.songs.length != 0) {
-                    let _songs = queueConstruct.songs
+                    let _music = []
+                    queueConstruct.songs.forEach(music => {
+                        _music.push(music)
+                    })
+                    
                     queueConstruct.songs.push(song)
                     changeList(true, guildID, client, queueConstruct.songs)
 
                     let maxPage = storageManager.getSettings("guilds/"+guildID, "maxPage")
-                    if(maxPage >= maxPagePremium && storageManager.getSettings("guilds/"+guildID, "premium")){
+                    if(maxPage > maxPagePremium && storageManager.getSettings("guilds/"+guildID, "premium")){
                         queueConstruct.songs = _songs
                         let member = await message.guild.members.fetch(message.guild.ownerID)
                         member.send("you need the premium to have more than"+ maxPagePremium +"page of music")
@@ -161,7 +165,7 @@ const getPlaylistTracks = async (playlistId, author, queueConstruct, guild, clie
         }
         changeList(true, guild.id, client, queueConstruct.songs)
         let maxPage = storageManager.getSettings("guilds/"+guild.id, "maxPage")
-        if(maxPage >= maxPagePremium && !storageManager.getSettings("guilds/"+guild.id, "premium")){
+        if(maxPage > maxPagePremium && !storageManager.getSettings("guilds/"+guild.id, "premium")){
             queueConstruct["songs"] = _songss
             let member = await guild.members.fetch(guild.ownerID)
             member.send("you need the premium to have more than"+ maxPagePremium +"page of music")
